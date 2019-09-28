@@ -25,7 +25,15 @@ namespace DocuWareComObject
         public string ServerUrl
         {
             get { return server_url.AbsoluteUri; }
-            set { server_url = new Uri(value); }
+            set {
+                try
+                {
+                    server_url = new Uri(value);
+                }catch(Exception ex)
+                {
+                    Logging.Log("Error set server url" + value,ex);
+                }
+            }
         }
         public bool UseWindowsAuthentication { get; set; }
         public string UserName { get; set; }
@@ -33,6 +41,8 @@ namespace DocuWareComObject
 
         public bool ConectServer()
         {
+            if (server_url == null)
+                return false;
             try
             {
                 if (UseWindowsAuthentication)
@@ -96,7 +106,10 @@ namespace DocuWareComObject
         {
             List<FileCabinet> cabinets = GetAllFileCabinets();
             Serializator<List<FileCabinet>> ser = new Serializator<List<FileCabinet>>();
-            return ser.SerializationXMLString(cabinets);
+            if (cabinets != null)
+                return ser.SerializationXMLString(cabinets);
+            else
+                return "Error";
         }
 
         public List<Document> GetAllFileInCabinet(string cabinet_id)
@@ -155,7 +168,7 @@ namespace DocuWareComObject
             return ser.SerializationXMLString(documents);
         }
 
-        public void DownloadDocumet(string cabinet_id, string file_id, string downloadPatch)
+        public string DownloadDocumet(string cabinet_id, string file_id, string downloadPatch)
         {
             if (conector == null)
             {
@@ -169,15 +182,18 @@ namespace DocuWareComObject
                     {
                         TargetFileType = FileDownloadType.Auto
                     }).Result;
-                using (var fileStream = File.Create(downloadPatch + downloadResponse.ContentHeaders.ContentDisposition.FileName))
+                string save_url = downloadPatch + downloadResponse.ContentHeaders.ContentDisposition.FileName;
+                using (var fileStream = File.Create(save_url))
                 {
                     downloadResponse.Content.CopyTo(fileStream);
                     fileStream.Flush();
                 }
+                return save_url;
             }
             catch (Exception ex)
             {
                 Logging.Log("Error download file", ex);
+                return "";
             }
         }
 

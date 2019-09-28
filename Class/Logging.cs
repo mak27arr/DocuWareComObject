@@ -11,19 +11,25 @@ namespace DocuWare.Class
     public static class Logging
     {
         private static object syncObj = new object();
-        //private static string setting_file_name = "log.txt";
-        //private static long log_file_max_size = 20 * 1024 * 1024;//20Mb
+        private static string setting_file_name = "log.txt";
+        private static long log_file_max_size = 20 * 1024 * 1024;//20Mb
         public static void Log(string msg, Object obj = null)
         {
-            //string patc = getLogFileLocation();
+            string patc = getLogFileLocation();
             string msg_formated = formatMg(msg, obj);
-            //cheakLogFileSize();
+            cheakLogFileSize();
             lock (syncObj)
             {
-                using (System.Diagnostics.EventLog eventLog = new System.Diagnostics.EventLog("Application"))
+                try
                 {
-                    eventLog.Source = System.Reflection.Assembly.GetExecutingAssembly().GetName().FullName;
-                    eventLog.WriteEntry(msg_formated, System.Diagnostics.EventLogEntryType.Error, 101, 1);
+                    using (StreamWriter sw = new StreamWriter(patc, true, System.Text.Encoding.Default))
+                    {
+                        sw.WriteLine(msg_formated);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -47,28 +53,28 @@ namespace DocuWare.Class
         private static string getLogFileLocation()
         {
             string patch = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            //patch += "\\" + setting_file_name;
+            patch += "\\" + setting_file_name;
             return patch;
         }
 
         private static void cheakLogFileSize()
         {
-            //string patch = getLogFileLocation();
-            //if (System.IO.File.Exists(patch))
-            //{
-            //    if (log_file_max_size < new System.IO.FileInfo(patch).Length)
-            //    {
-            //        lock (syncObj)
-            //        {
-            //            using (StreamWriter sw = new StreamWriter(new IsolatedStorageFileStream(patch, FileMode.Truncate, null)))
-            //            {
-            //                sw.WriteLine(patch, "Log file clean: " + DateTime.Now.ToLongDateString());
-            //                sw.Close();
-            //            }
-            //        }
-            //    }
+            string patch = getLogFileLocation();
+            if (System.IO.File.Exists(patch))
+            {
+                if (log_file_max_size < new System.IO.FileInfo(patch).Length)
+                {
+                    lock (syncObj)
+                    {
+                        using (StreamWriter sw = new StreamWriter(new IsolatedStorageFileStream(patch, FileMode.Truncate, null)))
+                        {
+                            sw.WriteLine(patch, "Log file clean: " + DateTime.Now.ToLongDateString());
+                            sw.Close();
+                        }
+                    }
+                }
 
-            //}
+            }
         }
 
     }

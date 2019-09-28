@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyKeyFile("mak27arr.pfx")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("524c2dfb-0474-4d8b-bdc4-2c4baa2a8ffa")]
+[assembly: Guid("FF055DE1-7B36-4CF8-8583-62D2B30E8D96")]
 
 // Version information for an assembly consists of the following four values:
 //
