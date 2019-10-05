@@ -11,9 +11,9 @@ namespace DocuWareComObject.Class
     {
         public string SerializationXMLString(T data_to_serializate)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof(T));
             try
             {
+                XmlSerializer formatter = new XmlSerializer(typeof(T));
                 using (StringWriter textWriter = new StringWriter())
                 {
                     formatter.Serialize(textWriter, data_to_serializate);

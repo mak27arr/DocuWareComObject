@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class\DocumentInfo.cs" />
     <Compile Include="DocuWare.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

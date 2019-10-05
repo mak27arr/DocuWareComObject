@@ -50,31 +50,41 @@ namespace DocuWare.Class
             }
             return msg_ret;
         }
-        private static string getLogFileLocation()
+        public static string getLogFileLocation()
         {
-            string patch = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            patch += "\\" + setting_file_name;
-            return patch;
+            try
+            {
+                string patch = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+                patch += "\\" + setting_file_name;
+                return patch;
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return "c:\\temp\\" + setting_file_name;
+            }
         }
 
         private static void cheakLogFileSize()
         {
-            string patch = getLogFileLocation();
-            if (System.IO.File.Exists(patch))
-            {
-                if (log_file_max_size < new System.IO.FileInfo(patch).Length)
+            try {
+                string patch = getLogFileLocation();
+                if (System.IO.File.Exists(patch))
                 {
-                    lock (syncObj)
+                    if (log_file_max_size < new System.IO.FileInfo(patch).Length)
                     {
-                        using (StreamWriter sw = new StreamWriter(new IsolatedStorageFileStream(patch, FileMode.Truncate, null)))
+                        lock (syncObj)
                         {
-                            sw.WriteLine(patch, "Log file clean: " + DateTime.Now.ToLongDateString());
-                            sw.Close();
+                            using (StreamWriter sw = new StreamWriter(new IsolatedStorageFileStream(patch, FileMode.Truncate, null)))
+                            {
+                                sw.WriteLine(patch, "Log file clean: " + DateTime.Now.ToLongDateString());
+                                sw.Close();
+                            }
                         }
                     }
                 }
 
             }
+            catch (Exception ex) { }
         }
 
     }
