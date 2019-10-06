@@ -19,8 +19,6 @@ namespace DocuWareComObject
 {
     public class DocuWare : IDocumentMenegmentConector, IDocumentMenegmantSettings
     {
-        //[assembly: ComVisible(true)]
-        //[assembly: AssemblyKeyFile("mak27arr.snk")]
 
         private static Uri server_url;
         private ServiceConnection conector;
@@ -230,23 +228,6 @@ namespace DocuWareComObject
                 }
             });
 
-            //List<Document> alldocument = new List<Document>();
-            //foreach (FileCabinet cabinet in cabinets)
-            //{
-            //    try
-            //    {
-            //        List<Document> file_in_cabinet = GetAllFileInCabinet(cabinet.Id);
-            //        if (file_in_cabinet.Count > 0)
-            //            alldocument = alldocument.Concat(file_in_cabinet).ToList();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Logging.Log("Error get search in cabinet", ex);
-            //    }
-
-            //}
-
-            return alldocument.ToList();
 
             return alldocument.ToList();
         }
@@ -266,25 +247,13 @@ namespace DocuWareComObject
                 Logging.Log("Error get cabinet list in action GetAllFile()");
                 return null;
             }
-            //ConcurrentBag<Document> alldocument = new ConcurrentBag<Document>();
+
             List<Document> alldocument = new List<Document>();
             object locker = new object();
             Parallel.ForEach(cabinets, cabinet =>
             {
                 try
                 {
-                    //DocuWare docuWare = new DocuWare();
-                    //docuWare.ServerUrl = ServerUrl;
-                    //docuWare.ServerUrl = ServerUrl;
-                    //docuWare.UseWindowsAuthentication =this.UseWindowsAuthentication;
-                    //docuWare.UserName = UserName;
-                    //docuWare.Password = Password;
-                    //docuWare.ConectServer();
-                    //List<Document> file_in_cabinet = docuWare.GetAllFileInCabinet(cabinet.Id).Where(d => ((d?.Fields?.Find(f => f.FieldName == field_name)?.Item as string) ?? "").IndexOf(contractNo, StringComparison.OrdinalIgnoreCase) >= 0)?.ToList();
-                    //foreach (var doc in file_in_cabinet)
-                    //{
-                    //    alldocument.Add(doc);
-                    //}
                     var dialogInfoItems = cabinet.GetDialogInfosFromSearchesRelation();
                     var dialog = dialogInfoItems.Dialog[0].GetDialogFromSelfRelation();
 
@@ -305,28 +274,12 @@ namespace DocuWareComObject
                     {
                         alldocument = alldocument.Concat(queryResult.Items.ToList()).ToList();
                     }
-                    //docuWare.DisconectServer();
                 }
                 catch (Exception ex)
                 {
                     Logging.Log("Error thread stop search", ex);
                 }
             });
-            //List<Document> alldocument = new List<Document>();
-            //foreach (FileCabinet cabinet in cabinets)
-            //{
-            //    try
-            //    {
-            //        List<Document> file_in_cabinet = GetAllFileInCabinet(cabinet.Id).Where(d => ((d.Fields.Find(f => f.FieldName == field_name).Item as string)?? "").IndexOf(contractNo, StringComparison.OrdinalIgnoreCase)  >= 0)?.ToList();
-            //        if (file_in_cabinet.Count > 0)
-            //            alldocument = alldocument.Concat(file_in_cabinet).ToList();
-            //    }
-            //    catch(Exception ex)
-            //    {
-            //        Logging.Log("Error get search in cabinet",ex);
-            //    }
-
-            //}
 
             return alldocument.ToList();
         }
