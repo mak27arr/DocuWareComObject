@@ -15,5 +15,10 @@ namespace DocuWareComObject.Interface
         string GetAllFileXML();
         string[] GetDocumentArray();
         string GetDocumentName(string patch);
+
+        void AddSearchField(string fild_name, string fild_value);
+        void AddSearchField(string fild_name, string fild_value_from,string fild_value_to);
+
+        string SearchExXML();
     }
 }

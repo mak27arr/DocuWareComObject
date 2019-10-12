@@ -40,6 +40,7 @@ namespace DocuWareComObject
         public string UserName { get; set; }
         public string Password { get; set; }
 
+        private List<Tuple<string, string, string>> searchParamtr = new List<Tuple<string, string, string>>();
         public bool ConectServer()
         {
             if (server_url == null)
@@ -356,6 +357,82 @@ namespace DocuWareComObject
         public string GetLogFileLocation()
         {
             return Logging.getLogFileLocation();
+        }
+
+        public void AddSearchField(string fild_name, string fild_value)
+        {
+            searchParamtr.Add(new Tuple<string, string, string>(fild_name, fild_value, ""));
+        }
+
+        public void AddSearchField(string fild_name, string fild_value_from, string fild_value_to)
+        {
+            searchParamtr.Add(new Tuple<string, string, string>(fild_name, fild_value_from, fild_value_to));
+        }
+
+        public List<Document> SearchEx()
+        {
+            List<FileCabinet> cabinets = GetAllFileCabinets();
+            if (cabinets == null)
+            {
+                Logging.Log("Error get cabinet list in action GetAllFile()");
+                return null;
+            }
+
+            List<Document> alldocument = new List<Document>();
+            object locker = new object();
+
+            List<DialogExpressionCondition> dec = new List<DialogExpressionCondition>();
+
+            foreach (var serch_parm in searchParamtr)
+            {
+                if (serch_parm.Item3 == "")
+                {
+                    dec.Add(DialogExpressionCondition.Create(serch_parm.Item1, serch_parm.Item2, serch_parm.Item2));
+                }
+                else
+                {
+                    dec.Add(DialogExpressionCondition.Create(serch_parm.Item1, serch_parm.Item2, serch_parm.Item3));
+                }
+            }
+
+            Parallel.ForEach(cabinets, cabinet =>
+            {
+                try
+                {
+                    var dialogInfoItems = cabinet.GetDialogInfosFromSearchesRelation();
+                    var dialog = dialogInfoItems.Dialog[0].GetDialogFromSelfRelation();
+
+                    var q = new DialogExpression()
+                    {
+                        Operation = DialogExpressionOperation.And,
+                        Condition = new List<DialogExpressionCondition>(dec),
+                        Count = int.MaxValue,
+                        SortOrder = new List<SortedField>
+                {
+                    SortedField.Create("DWSTOREDATETIME", SortDirection.Desc)
+                }
+                    };
+                    var queryResult = dialog.GetDocumentsResult(q);
+
+                    lock (locker)
+                    {
+                        alldocument = alldocument.Concat(queryResult.Items.ToList()).ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Error thread stop search", ex);
+                }
+            });
+
+            return alldocument.ToList();
+        }
+
+        public string SearchExXML()
+        {
+            List<Document> documents = SearchEx();
+            Serializator<List<Document>> ser = new Serializator<List<Document>>();
+            return ser.SerializationXMLString(documents);
         }
     }
 }
